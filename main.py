@@ -175,8 +175,8 @@ def verify_files(album_path, flac_files, log_filename, flac_command):
     general_status = "OK"
     for file in tqdm(flac_files, desc="Verifying files"):
         flac_file = FLAC(path.join(album_path, file))
-        track_number = int(flac_file["TRACKNUMBER"][0].split("/")[0]) if len(flac_file["TRACKNUMBER"]) > 1 else 1
-        verified_crc = get_file_crc(album_path, file, flac_command).upper()
+        track_number = int(flac_file["TRACKNUMBER"][0].split("/")[0]) if len(flac_files) > 1 else 1
+        verified_crc = get_file_crc(album_path, file, flac_command).upper().zfill(8)
         crc_dict[track_number].update(
             {
                 "file": file,
