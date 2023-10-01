@@ -4,6 +4,7 @@ from mutagen.flac import FLAC
 from subprocess import run
 from tqdm import tqdm
 from zlib import crc32
+import chardet
 
 file_path = path.dirname(__file__)
 
@@ -147,7 +148,10 @@ def verify_files(album_path, flac_files, log_filename, flac_command):
     """
 
     crc_dict = {}
-    with open(path.join(album_path, log_filename), "r", encoding="ANSI") as log_file:
+    with open(path.join(album_path, log_filename), "rb") as raw:
+        encoding = chardet.detect(raw.read())["encoding"]
+    
+    with open(path.join(album_path, log_filename), "r", encoding=encoding) as log_file:
         log_lines = log_file.readlines()
         i = 1
         for line in log_lines:
@@ -171,7 +175,7 @@ def verify_files(album_path, flac_files, log_filename, flac_command):
     general_status = "OK"
     for file in tqdm(flac_files, desc="Verifying files"):
         flac_file = FLAC(path.join(album_path, file))
-        track_number = int(flac_file["TRACKNUMBER"][0].split("/")[0])
+        track_number = int(flac_file["TRACKNUMBER"][0].split("/")[0]) if len(flac_file["TRACKNUMBER"]) > 1 else 1
         verified_crc = get_file_crc(album_path, file, flac_command).upper()
         crc_dict[track_number].update(
             {
@@ -188,7 +192,7 @@ def verify_files(album_path, flac_files, log_filename, flac_command):
 
     print("\n")
     to_print = (
-        f"CRChecker v0.0.1\n\nFiles verified on {time.strftime('%d/%m/%Y %H:%M:%S')}\n\n"
+        f"CRChecker v0.0.2\n\nFiles verified on {time.strftime('%d/%m/%Y %H:%M:%S')}\n\n"
         f"Status: {general_status}\n\n{'-'*50}\n\n"
     )
     for key, value in crc_dict.items():
@@ -199,6 +203,7 @@ def verify_files(album_path, flac_files, log_filename, flac_command):
             f"Status: {value['status']}\n"
         )
         to_print += "\n\n"
+    to_print = to_print.strip()
     print(to_print)
 
     if args.save:
