@@ -132,12 +132,12 @@ def get_file_crc(album_path, file, flac_command):
 
     to_return = 0
 
-    with open(path.join(album_path, file.split(".")[0] + ".raw"), "rb") as raw_file:
+    with open(path.join(album_path, file.replace(".flac", "") + ".raw"), "rb") as raw_file:
         raw_data = raw_file.read()
         crc = crc32(raw_data)
         to_return = hex(crc & 0xFFFFFFFF)[2:]
 
-    remove(path.join(album_path, file.split(".")[0] + ".raw"))
+    remove(path.join(album_path, file.replace(".flac", "") + ".raw"))
 
     return to_return
 
@@ -192,7 +192,7 @@ def verify_files(album_path, flac_files, log_filename, flac_command):
 
     print("\n")
     to_print = (
-        f"CRChecker v0.0.2\n\nFiles verified on {time.strftime('%d/%m/%Y %H:%M:%S')}\n\n"
+        f"CRChecker v0.0.3\n\nFiles verified on {time.strftime('%d/%m/%Y %H:%M:%S')}\n\n"
         f"Status: {general_status}\n\n{'-'*50}\n\n"
     )
     for key, value in crc_dict.items():
